@@ -1,19 +1,20 @@
 {
   "name": "plus-webp",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Plus WebP",
-  "main": "plus-webp.js",
+  "main": "index.js",
   "scripts": {
-    "start": "wp-scripts start",
-    "build:plus-webp": "wp-scripts build src/plus-webp --output-path=dist",
-    "lint-js": "wp-scripts lint-js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "wp-scripts build",
+    "start": "wp-scripts start"
   },
   "author": "Katsushi Kawamori",
   "devDependencies": {
-    "@wordpress/scripts": "26.5.0"
+    "@wordpress/scripts": "30.4.0"
   },
   "dependencies": {
-    "@wordpress/api-fetch": "^6.31.0"
+    "@wordpress/api-fetch": "^7.11.0",
+    "@wordpress/dom-ready": "^4.11.0",
+    "@wordpress/element": "^6.11.0",
+    "@wordpress/i18n": "^5.11.0"
   }
 }

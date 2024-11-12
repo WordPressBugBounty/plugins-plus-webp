@@ -348,16 +348,16 @@ class PlusWebp {
 			list( $attachment_link, $attachment_url, $filename, $original_image_url, $original_filename, $mime_type, $stamptime, $file_size ) = $this->output_datas( $webp_id, $metadata );
 
 			$message = 'ID: ' . $webp_id . "\n";
-			$message .= __( 'Title' ) . ': ' . get_the_title( $webp_id ) . "\n";
-			$message .= __( 'Permalink:' ) . ' ' . $attachment_link . "\n";
+			$message .= __( 'Title', 'plus-webp' ) . ': ' . get_the_title( $webp_id ) . "\n";
+			$message .= __( 'Permalink:', 'plus-webp' ) . ' ' . $attachment_link . "\n";
 			$message .= 'URL: ' . $attachment_url . "\n";
-			$message .= __( 'File name:' ) . ' ' . $filename . "\n";
+			$message .= __( 'File name:', 'plus-webp' ) . ' ' . $filename . "\n";
 			if ( ! empty( $original_image_url ) ) {
 				$message .= __( 'Original URL:', 'plus-webp' ) . ' ' . $original_image_url . "\n";
 				$message .= __( 'Original File name:', 'plus-webp' ) . ' ' . $original_filename . "\n";
 			}
-			$message .= __( 'Date/Time' ) . ': ' . $stamptime . "\n";
-			$message .= __( 'File size:' ) . ' ' . $file_size . "\n";
+			$message .= __( 'Date/Time', 'plus-webp' ) . ': ' . $stamptime . "\n";
+			$message .= __( 'File size:', 'plus-webp' ) . ' ' . $file_size . "\n";
 			if ( ! empty( $imagethumburls ) ) {
 				foreach ( $imagethumburls as $thumbsize => $imagethumburl ) {
 					$message .= $thumbsize . ': ' . $imagethumburl . "\n";

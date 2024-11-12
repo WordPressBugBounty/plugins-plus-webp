@@ -1,7 +1,6 @@
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-
 import { Button } from '@wordpress/components';
-
 import ProgressBar from './progress-bar';
 
 import {
@@ -74,7 +73,7 @@ const Generate = () => {
 			<ProgressBar
 				p_count = { currentGenerateprogress }
 				max_count = { max_count }
-				text = { pluswebpgenerate_data.generate_end_label }
+				text = { __( 'Generation has been completed.', 'plus-webp' ) }
 				updatecurrentProgress = { updatecurrentGenerateprogress }
 				updatecurrentSubmit = { updatecurrentSubmitgenerate }
 			/>
@@ -85,7 +84,7 @@ const Generate = () => {
 					className = { 'button button-large' }
 					onClick = { onclick_submitstop }
 				>
-				{ pluswebpgenerate_data.stop_label }
+				{ __( 'Stop', 'plus-webp' ) }
 				</Button>
 			);
 		}
@@ -106,13 +105,13 @@ const Generate = () => {
 					className = { 'button button-large' }
 					onClick = { onclick_submitgenerate }
 				>
-				{ pluswebpgenerate_data.generate_label }
+				{ __( 'Generate', 'plus-webp' ) }
 				</Button>
 			);
 		} else {
 			items_description.push(
 				<p className="description">
-					{ pluswebpgenerate_data.non_description }
+					{ __( 'Cannot find any media that can be generated.', 'plus-webp' ) }
 				</p>
 			);
 		}
@@ -123,16 +122,16 @@ const Generate = () => {
 			className = { 'button button-large' }
 			onClick = { onclick_submitcheck }
 		>
-		{ pluswebpgenerate_data.check_label }
+		{ __( 'Check', 'plus-webp' ) }
 		</Button>
 	);
 
 	return (
 		<>
-			<h2>{ pluswebpgenerate_data.bulk_label }</h2>
-			<b><li>{ pluswebpgenerate_data.generate_description_label }</li></b>
-			<b><li>{ pluswebpgenerate_data.description_label }</li></b>
-			<b><li>{ pluswebpgenerate_data.wp_cli_label }</li></b>
+			<h2>{ __( 'Bulk Generate', 'plus-webp' ) }</h2>
+			<b><li>{ __( 'Notified by email with details of the generate results.', 'plus-webp' ) }</li></b>
+			<b><li>{ __( 'To perform "Bulk Generate" after changing the following settings, press "Check" and then press "Generate".', 'plus-webp' ) }</li></b>
+			<b><li>{ __( 'WP-CLI commands are available. If you have a large number of files, WP-CLI commands is more reliable. Command line option allows the user to specify whether to send e-mail, the media ID of the sender and the settings.', 'plus-webp' ) }</li></b>
 			<div className="settings">
 				<strong>WP-CLI</strong>
 				<code>wp pluswebpavif</code>

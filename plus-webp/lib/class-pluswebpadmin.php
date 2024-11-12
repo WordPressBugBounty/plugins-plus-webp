@@ -56,7 +56,7 @@ class PlusWebpAdmin {
 			$this_plugin = 'plus-webp/pluswebp.php';
 		}
 		if ( $file === $this_plugin ) {
-			$links[] = '<a href="' . admin_url( 'upload.php?page=plus-webp' ) . '">' . esc_html__( 'Settings' ) . ' & ' . esc_html__( 'Bulk Generate', 'plus-webp' ) . '</a>';
+			$links[] = '<a href="' . admin_url( 'upload.php?page=plus-webp' ) . '">' . esc_html__( 'Settings', 'plus-webp' ) . ' & ' . esc_html__( 'Bulk Generate', 'plus-webp' ) . '</a>';
 		}
 			return $links;
 	}
@@ -84,7 +84,19 @@ class PlusWebpAdmin {
 	 */
 	public function plus_webp_generate_setteings() {
 
-		echo '<div id="plus-webp-page"></div>';
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'plus-webp' ) );
+		}
+
+		global $wp_version;
+		$requires = '6.6';
+		if ( version_compare( $wp_version, $requires, '>=' ) ) {
+			$admin_screen = esc_html__( 'Loading…', 'plus-webp' );
+		} else {
+			/* translators: WordPress requires version */
+			$admin_screen = sprintf( esc_html__( 'WordPress %s or higher is required to view this screen.', 'plus-webp' ), $requires );
+		}
+		printf( '<div class="wrap" id="plus-webp-page">%s</div>', esc_html( $admin_screen ) );
 	}
 
 	/** ==================================================
@@ -99,21 +111,29 @@ class PlusWebpAdmin {
 			return;
 		}
 
-		$asset_file = include plugin_dir_path( __DIR__ ) . 'guten/dist/plus-webp.asset.php';
+		$asset_file = plugin_dir_path( __DIR__ ) . 'guten/build/index.asset.php';
+
+		if ( ! file_exists( $asset_file ) ) {
+			return;
+		}
+
+		$asset = include $asset_file;
 
 		wp_enqueue_style(
 			'plus-webp-style',
-			plugin_dir_url( __DIR__ ) . 'guten/dist/plus-webp.css',
+			plugin_dir_url( __DIR__ ) . 'guten/build/index.css',
 			array( 'wp-components' ),
 			'1.0.0',
 		);
 
 		wp_enqueue_script(
 			'plus-webp',
-			plugin_dir_url( __DIR__ ) . 'guten/dist/plus-webp.js',
-			$asset_file['dependencies'],
-			$asset_file['version'],
-			true
+			plugin_dir_url( __DIR__ ) . 'guten/build/index.js',
+			$asset['dependencies'],
+			$asset['version'],
+			array(
+				'in_footer' => true,
+			)
 		);
 
 		$pluswebp_settings = get_option( 'pluswebp' );
@@ -130,22 +150,9 @@ class PlusWebpAdmin {
 			'plus-webp',
 			'pluswebpgenerate_data',
 			array(
-				'bulk_label' => __( 'Bulk Generate', 'plus-webp' ),
-				'description_label' => __( 'To perform "Bulk Generate" after changing the following settings, press "Check" and then press "Generate".', 'plus-webp' ),
-				'wp_cli_label' => __( 'WP-CLI commands are available. If you have a large number of files, WP-CLI commands is more reliable. Command line option allows the user to specify whether to send e-mail, the media ID of the sender and the settings.', 'plus-webp' ),
-				'generate_label' => __( 'Generate', 'plus-webp' ),
-				'generate_description_label' => __( 'Notified by email with details of the generate results.', 'plus-webp' ),
-				'generate_end_label' => __( 'Generation has been completed.', 'plus-webp' ),
-				'stop_label' => __( 'Stop', 'plus-webp' ),
-				'check_label' => __( 'Check', 'plus-webp' ),
 				/* translators: Count of Media */
 				'generate_description' => sprintf( __( 'Found %1$d media that can be generated.', 'plus-webp' ), count( $post_ids ) ),
-				'non_description' => __( 'Cannot find any media that can be generated.', 'plus-webp' ),
 				'non_generate_description' => $non_generate_description,
-				'title_label' => __( 'Title' ) . ': ',
-				'filename_label' => __( 'File name:' ) . ' ',
-				'datetime_label' => __( 'Date/Time' ) . ': ',
-				'filesize_label' => __( 'File size:' ) . ' ',
 				'post_ids' => wp_json_encode( $post_ids, JSON_UNESCAPED_SLASHES ),
 			)
 		);
@@ -154,26 +161,11 @@ class PlusWebpAdmin {
 			'plus-webp',
 			'pluswebpsettings_data',
 			array(
-				'settings_label' => __( 'Settings' ),
-				'output_mime_label' => __( 'Generated images', 'plus-webp' ),
-				'output_mime_description_label' => __( 'Specifies the file type to be output after conversion.', 'plus-webp' ),
-				'quality_label' => __( 'Quality', 'plus-webp' ),
-				'lowreso_label' => __( 'low resolution', 'plus-webp' ),
-				'highreso_label' => __( 'high resolution', 'plus-webp' ),
-				'quality_description_label' => __( 'Specifies the quality of generated images. The higher the number, the better the quality and the larger the file size.', 'plus-webp' ),
-				'type_label' => __( 'Type' ),
-				'type_description_label' => __( 'Check the type of source image to be converted.', 'plus-webp' ),
-				'append_label' => __( 'Append the generated images extension(webp,avif) to the original filename', 'plus-webp' ),
-				'apply_label' => __( 'Apply' ),
-				'append_description_label' => __( 'Checking this setting, the generated images extension(webp,avif) will be appended to the name of the file, including the extension. Not checking, only the extension is changed.', 'plus-webp' ),
-				'replace_label' => __( 'WebP or AVIF replacement of images and contents', 'plus-webp' ),
-				'replace_description_label' => __( 'Checking this setting will replace image files with WebP or AVIF when adding new media, and delete the original image file. Also, when generating all images, the original image file ID will be overwritten as WebP or AVIF and the original image file will be deleted. All URLs in the content are also replaced.', 'plus-webp' ),
-				'replace_advanced_description_label' => __( 'If you want to replace other databases besides content, use the "plus_webp_advanced_change_db" filter hook.', 'plus-webp' ),
-				'replace_advanced_link' => __( 'https://wordpress.org/plugins/plus-webp/', 'plus-webp' ),
-				'replace_advanced_text' => __( '"plus_webp_advanced_change_db" filter hook', 'plus-webp' ),
 				'settings' => wp_json_encode( $pluswebp_settings, JSON_UNESCAPED_SLASHES ),
 			)
 		);
+
+		wp_set_script_translations( 'plus-webp', 'plus-webp' );
 
 		$this->credit_gutenberg( 'plus-webp' );
 	}
@@ -328,20 +320,20 @@ class PlusWebpAdmin {
 			'credit',
 			array(
 				'links'          => __( 'Various links of this plugin', 'plus-webp' ),
-				'plugin_version' => __( 'Version:' ) . ' ' . $plugin_ver_num,
+				'plugin_version' => __( 'Version:', 'plus-webp' ) . ' ' . $plugin_ver_num,
 				/* translators: FAQ Link & Slug */
 				'faq'            => sprintf( __( 'https://wordpress.org/plugins/%1$s/faq', 'plus-webp' ), $slug ),
 				'support'        => 'https://wordpress.org/support/plugin/' . $slug,
 				'review'         => 'https://wordpress.org/support/view/plugin-reviews/' . $slug,
 				'translate'      => 'https://translate.wordpress.org/projects/wp-plugins/' . $slug,
 				/* translators: Plugin translation link */
-				'translate_text' => sprintf( __( 'Translations for %s' ), $plugin_name ),
+				'translate_text' => sprintf( __( 'Translations for %s', 'plus-webp' ), $plugin_name ),
 				'facebook'       => 'https://www.facebook.com/katsushikawamori/',
 				'twitter'        => 'https://twitter.com/dodesyo312',
 				'youtube'        => 'https://www.youtube.com/channel/UC5zTLeyROkvZm86OgNRcb_w',
 				'donate'         => __( 'https://shop.riverforest-wp.info/donate/', 'plus-webp' ),
 				'donate_text'    => __( 'Please make a donation if you like my work or would like to further the development of this plugin.', 'plus-webp' ),
-				'donate_button'  => __( 'Donate to this plugin &#187;' ),
+				'donate_button'  => __( 'Donate to this plugin &#187;', 'plus-webp' ),
 			)
 		);
 	}

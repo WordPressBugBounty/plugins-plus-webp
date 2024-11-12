@@ -202,7 +202,7 @@ class PlusWebpAVIFCLI {
 					if ( ! empty( $no_file_ids ) ) {
 						foreach ( $no_file_ids as $post_id ) {
 							$message = 'ID: ' . $post_id . "\n";
-							$message .= __( 'Title' ) . ': ' . get_the_title( $post_id ) . "\n";
+							$message .= __( 'Title', 'plus-webp' ) . ': ' . get_the_title( $post_id ) . "\n";
 							$message .= __( 'This media exists in the database, but the file does not, so the conversion was not performed.', 'plus-webp' ) . "\n";
 							$message .= "\n";
 							WP_CLI::warning( $message );

@@ -1,9 +1,7 @@
 import './settings.css';
-
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-
 import { Button, RadioControl, RangeControl, ToggleControl } from '@wordpress/components';
-
 import {
 	useState,
 	useEffect
@@ -170,7 +168,7 @@ const Settings = () => {
 	if( typeof currentOptions !== 'undefined' ) {
 		items_addext.push(
 			<ToggleControl
-				label = { pluswebpsettings_data.apply_label }
+				label = { __( 'Apply', 'plus-webp' ) }
 				checked = { currentOptions['addext'] }
 				onChange = { ( value ) =>
 					{
@@ -187,7 +185,7 @@ const Settings = () => {
 	if( typeof currentOptions !== 'undefined' ) {
 		items_replace.push(
 			<ToggleControl
-				label = { pluswebpsettings_data.apply_label }
+				label = { __( 'Apply', 'plus-webp' ) }
 				checked = { currentOptions['replace'] }
 				onChange = { ( value ) =>
 					{
@@ -202,56 +200,56 @@ const Settings = () => {
 
 	return (
 		<>
-			<h2>{ pluswebpsettings_data.settings_label }</h2>
+			<h2>{ __( 'Settings', 'plus-webp' ) }</h2>
 			<div className="settings">
-				<h3>{ pluswebpsettings_data.output_mime_label }</h3>
+				<h3>{ __( 'Generated images', 'plus-webp' ) }</h3>
 				<div className="settings2">
 					{ items_output_mime }
 					<p className="description">
-						{ pluswebpsettings_data.output_mime_description_label }
+						{ __( 'Specifies the file type to be output after conversion.', 'plus-webp' ) }
 					</p>
 				</div>
 			</div>
 			<div className="settings">
-				<h3>{ pluswebpsettings_data.quality_label }</h3>
+				<h3>{ __( 'Quality', 'plus-webp' ) }</h3>
 				<div className="settings2">
 					{ items_quality }
 					<p className="description">
-						{ pluswebpsettings_data.quality_description_label }
+						{ __( 'Specifies the quality of generated images. The higher the number, the better the quality and the larger the file size.', 'plus-webp' ) }
 					</p>
 				</div>
 			</div>
 			<div className="settings">
-				<h3>{ pluswebpsettings_data.type_label }</h3>
+				<h3>{ __( 'Type', 'plus-webp' ) }</h3>
 				<div className="settings2">
 					{ items_types }
 					<p className="description">
-						{ pluswebpsettings_data.type_description_label }
+						{ __( 'Check the type of source image to be converted.', 'plus-webp' ) }
 					</p>
 				</div>
 			</div>
 			<div className="settings">
-				<h3>{ pluswebpsettings_data.append_label }</h3>
+				<h3>{ __( 'Append the generated images extension(webp,avif) to the original filename', 'plus-webp' ) }</h3>
 				<div className="settings2">
 					{ items_addext }
 					<p className="description">
-						{ pluswebpsettings_data.append_description_label }
+						{ __( 'Checking this setting, the generated images extension(webp,avif) will be appended to the name of the file, including the extension. Not checking, only the extension is changed.', 'plus-webp' ) }
 					</p>
 				</div>
 			</div>
 			<div className="settings">
-				<h3>{ pluswebpsettings_data.replace_label }</h3>
+				<h3>{ __( 'WebP or AVIF replacement of images and contents', 'plus-webp' ) }</h3>
 				<div className="settings2">
 					{ items_replace }
 					<p className="description">
-						{ pluswebpsettings_data.replace_description_label }
-						{ pluswebpsettings_data.replace_advanced_description_label }
+						{ __( 'Checking this setting will replace image files with WebP or AVIF when adding new media, and delete the original image file. Also, when generating all images, the original image file ID will be overwritten as WebP or AVIF and the original image file will be deleted. All URLs in the content are also replaced.', 'plus-webp' ) }
+						{ __( 'If you want to replace other databases besides content, use the "plus_webp_advanced_change_db" filter hook.', 'plus-webp' ) }
 						<Button
-							href = { pluswebpsettings_data.replace_advanced_link }
+							href = { __( 'https://wordpress.org/plugins/plus-webp/', 'plus-webp' ) }
 							variant = "secondary"
 							target = "_blank"
 						>
-						{ pluswebpsettings_data.replace_advanced_text }
+						{ __( '"plus_webp_advanced_change_db" filter hook', 'plus-webp' ) }
 						</Button>
 					</p>
 				</div>
