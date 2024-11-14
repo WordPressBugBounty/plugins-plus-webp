@@ -3,7 +3,7 @@
  * Plugin Name: Plus WebP or AVIF
  * Plugin URI:  https://wordpress.org/plugins/plus-webp/
  * Description: Generate WebP or AVIF.
- * Version:     5.01
+ * Version:     5.03
  * Author:      Katsushi Kawamori
  * Author URI:  https://riverforest-wp.info/
  * License:     GPLv2 or later

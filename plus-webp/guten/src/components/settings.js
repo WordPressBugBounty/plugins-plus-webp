@@ -53,6 +53,7 @@ const Settings = () => {
 	if( typeof currentOptions !== 'undefined' ) {
 		items_quality.push(
 			<RangeControl
+				__nextHasNoMarginBottom
 				max = { 100 }
 				min = { 1 }
 				value = { currentOptions['quality'] }
@@ -75,92 +76,104 @@ const Settings = () => {
 			is_jpeg = true;
 		}
 		items_types.push(
-			<ToggleControl
-				label = 'image/jpeg'
-				checked = { is_jpeg }
-				onChange = { ( value ) =>
-					{
-						if ( value ) {
-							currentOptions['types'].push('image/jpeg');
-						} else {
-							let val = 'image/jpeg';
-							let index = currentOptions['types'].indexOf( val );
-							currentOptions['types'].splice( index, 1 )
+			<div className="line-margin">
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label = 'image/jpeg'
+					checked = { is_jpeg }
+					onChange = { ( value ) =>
+						{
+							if ( value ) {
+								currentOptions['types'].push('image/jpeg');
+							} else {
+								let val = 'image/jpeg';
+								let index = currentOptions['types'].indexOf( val );
+								currentOptions['types'].splice( index, 1 )
+							}
+							let data = Object.assign( {}, currentOptions );
+							updatecurrentOptions( data );
 						}
-						let data = Object.assign( {}, currentOptions );
-						updatecurrentOptions( data );
 					}
-				}
-			/>
+				/>
+			</div>
 		);
 		let is_png = false;
 		if ( currentOptions['types'].includes('image/png') ) {
 			is_png = true;
 		}
 		items_types.push(
-			<ToggleControl
-				label = 'image/png'
-				checked = { is_png }
-				onChange = { ( value ) =>
-					{
-						if ( value ) {
-							currentOptions['types'].push('image/png');
-						} else {
-							let val = 'image/png';
-							let index = currentOptions['types'].indexOf( val );
-							currentOptions['types'].splice( index, 1 )
+			<div className="line-margin">
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label = 'image/png'
+					checked = { is_png }
+					onChange = { ( value ) =>
+						{
+							if ( value ) {
+								currentOptions['types'].push('image/png');
+							} else {
+								let val = 'image/png';
+								let index = currentOptions['types'].indexOf( val );
+								currentOptions['types'].splice( index, 1 )
+							}
+							let data = Object.assign( {}, currentOptions );
+							updatecurrentOptions( data );
 						}
-						let data = Object.assign( {}, currentOptions );
-						updatecurrentOptions( data );
 					}
-				}
-			/>
+				/>
+			</div>
 		);
 		let is_bmp = false;
 		if ( currentOptions['types'].includes('image/bmp') ) {
 			is_bmp = true;
 		}
 		items_types.push(
-			<ToggleControl
-				label = 'image/bmp'
-				checked = { is_bmp }
-				onChange = { ( value ) =>
-					{
-						if ( value ) {
-							currentOptions['types'].push('image/bmp');
-						} else {
-							let val = 'image/bmp';
-							let index = currentOptions['types'].indexOf( val );
-							currentOptions['types'].splice( index, 1 )
+			<div className="line-margin">
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label = 'image/bmp'
+					checked = { is_bmp }
+					onChange = { ( value ) =>
+						{
+							if ( value ) {
+								currentOptions['types'].push('image/bmp');
+							} else {
+								let val = 'image/bmp';
+								let index = currentOptions['types'].indexOf( val );
+								currentOptions['types'].splice( index, 1 )
+							}
+							let data = Object.assign( {}, currentOptions );
+							updatecurrentOptions( data );
 						}
-						let data = Object.assign( {}, currentOptions );
-						updatecurrentOptions( data );
 					}
-				}
-			/>
+				/>
+			</div>
 		);
 		let is_gif = false;
 		if ( currentOptions['types'].includes('image/gif') ) {
 			is_gif = true;
 		}
 		items_types.push(
-			<ToggleControl
-				label = 'image/gif'
-				checked = { is_gif }
-				onChange = { ( value ) =>
-					{
-						if ( value ) {
-							currentOptions['types'].push('image/gif');
-						} else {
-							let val = 'image/gif';
-							let index = currentOptions['types'].indexOf( val );
-							currentOptions['types'].splice( index, 1 )
+			<div className="line-margin">
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label = 'image/gif'
+					checked = { is_gif }
+					onChange = { ( value ) =>
+						{
+							if ( value ) {
+								currentOptions['types'].push('image/gif');
+							} else {
+								let val = 'image/gif';
+								let index = currentOptions['types'].indexOf( val );
+								currentOptions['types'].splice( index, 1 )
+							}
+							let data = Object.assign( {}, currentOptions );
+							updatecurrentOptions( data );
 						}
-						let data = Object.assign( {}, currentOptions );
-						updatecurrentOptions( data );
 					}
-				}
-			/>
+				/>
+			</div>
 		);
 	}
 
@@ -168,6 +181,7 @@ const Settings = () => {
 	if( typeof currentOptions !== 'undefined' ) {
 		items_addext.push(
 			<ToggleControl
+				__nextHasNoMarginBottom
 				label = { __( 'Apply', 'plus-webp' ) }
 				checked = { currentOptions['addext'] }
 				onChange = { ( value ) =>
@@ -185,6 +199,7 @@ const Settings = () => {
 	if( typeof currentOptions !== 'undefined' ) {
 		items_replace.push(
 			<ToggleControl
+				__nextHasNoMarginBottom
 				label = { __( 'Apply', 'plus-webp' ) }
 				checked = { currentOptions['replace'] }
 				onChange = { ( value ) =>

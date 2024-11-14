@@ -5,7 +5,7 @@ Tags: media, upload, webp, avif
 Requires at least: 6.6
 Requires PHP: 8.1
 Tested up to: 6.7
-Stable tag: 5.01
+Stable tag: 5.03
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,12 @@ none
 3. Settings
 
 == Changelog ==
+
+= [5.03] 2024/11/14 =
+* Fix - Rebuilt javascript.
+
+= [5.02] 2024/11/14 =
+* Fix - Rebuilt javascript.
 
 = [5.01] 2024/11/12 =
 * Fix - Rebuilt javascript.

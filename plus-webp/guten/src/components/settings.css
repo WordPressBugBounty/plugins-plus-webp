@@ -1,9 +1,12 @@
 .settings {
-	 padding: 5px;
+  padding: 5px;
 }
 .settings2 {
-	 padding: 10px;
+  padding: 10px;
 }
 .range_width {
-	width: 300px;
+  width: 300px;
+}
+.line-margin {
+  margin: 1em;
 }
