@@ -4,8 +4,8 @@ Donate link: https://shop.riverforest-wp.info/donate/
 Tags: media, upload, webp, avif
 Requires at least: 6.6
 Requires PHP: 8.1
-Tested up to: 6.7
-Stable tag: 5.03
+Tested up to: 6.8
+Stable tag: 5.04
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,9 @@ none
 3. Settings
 
 == Changelog ==
+
+= [5.04] 2025/04/02 =
+* Fix - Rebuilt javascript.
 
 = [5.03] 2024/11/14 =
 * Fix - Rebuilt javascript.

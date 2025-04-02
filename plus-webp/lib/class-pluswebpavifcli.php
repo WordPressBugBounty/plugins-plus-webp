@@ -27,6 +27,10 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $pluswebpavifcli = new PlusWebpAVIFCLI();
 
 /** ==================================================
@@ -117,7 +121,7 @@ class PlusWebpAVIFCLI {
 		return $pluswebp_settings;
 	}
 
-	/** ==================================================
+	/**
 	 * Plus WebP or AVIF command
 	 *
 	 * @param array $args  arguments.

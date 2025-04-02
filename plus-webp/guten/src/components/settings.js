@@ -54,6 +54,7 @@ const Settings = () => {
 		items_quality.push(
 			<RangeControl
 				__nextHasNoMarginBottom
+				__next40pxDefaultSize
 				max = { 100 }
 				min = { 1 }
 				value = { currentOptions['quality'] }
