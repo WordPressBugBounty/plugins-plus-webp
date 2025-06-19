@@ -5,7 +5,7 @@ Tags: media, upload, webp, avif
 Requires at least: 6.6
 Requires PHP: 8.1
 Tested up to: 6.8
-Stable tag: 5.04
+Stable tag: 5.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,11 +24,12 @@ WP-CLI commands are available. If you have a large number of files, WP-CLI comma
 * `wp pluswebpavif`
 * `wp pluswebpavif webp` -> Generated WebP.
 * `wp pluswebpavif avif` -> Generated AVIF.
-* `wp pluswebpavif webp --mail=true` -> Send results via email.
-* `wp pluswebpavif webp --pid=12152` -> Process only specified Media ID.
+* `wp pluswebpavif help` -> Specification of this command.
+* `wp pluswebpavif webp mail` -> Send results via email.
+* `wp pluswebpavif webp replace` -> WebP or AVIF replacement of images and contents.
+* `wp pluswebpavif avif addext` -> Append the webp or avif extension to the original filename.
+* `wp pluswebpavif webp --pid=12152` -> Process only specified Media ID(Conversion source ID).
 * `wp pluswebpavif avif --quality=90` -> Specifies the quality of WebP or AVIF.
-* `wp pluswebpavif webp --replace=false` -> WebP or AVIF replacement of images and contents.
-* `wp pluswebpavif avif --addext=true` -> Append the webp or avif extension to the original filename.
 * `wp pluswebpavif webp --types=image/png,image/gif` -> MIME type to convert.
 
 = How it works =
@@ -67,6 +68,9 @@ none
 3. Settings
 
 == Changelog ==
+
+= [5.10] 2025/06/19 =
+* Change - WP-CLI argument specification changes.
 
 = [5.04] 2025/04/02 =
 * Fix - Rebuilt javascript.

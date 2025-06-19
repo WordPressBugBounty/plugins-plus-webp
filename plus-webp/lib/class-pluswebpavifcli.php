@@ -2,7 +2,7 @@
 /**
  * Cli Name:    Plus WebP or AVIF CLI
  * Description: Generate WebP or AVIF by WP-CLI.
- * Version:     3.00
+ * Version:     4.00
  * Author:      Katsushi Kawamori
  * Author URI:  https://riverforest-wp.info/
  * License:     GPLv2 or later
@@ -52,11 +52,13 @@ class PlusWebpAVIFCLI {
 	 * Settings change
 	 *
 	 * @param string $output  output type.
+	 * @param bool   $replace  Replace.
+	 * @param bool   $addext  Add ext.
 	 * @param array  $assoc_args  optional arguments.
 	 * @param array  $pluswebp_settings  settings.
 	 * @since 2.00
 	 */
-	private function settings_change( $output, $assoc_args, $pluswebp_settings ) {
+	private function settings_change( $output, $replace, $addext, $assoc_args, $pluswebp_settings ) {
 
 		switch ( $output ) {
 			case 'webp':
@@ -65,34 +67,15 @@ class PlusWebpAVIFCLI {
 			case 'avif':
 				$pluswebp_settings['output_mime'] = 'image/avif';
 				break;
-			default:
-				$pluswebp_settings['output_mime'] = 'image/webp';
 		}
+
+		$pluswebp_settings['replace'] = $replace;
+		$pluswebp_settings['addext'] = $addext;
 
 		if ( array_key_exists( 'quality', $assoc_args ) ) {
 			$pluswebp_settings['quality'] = intval( $assoc_args['quality'] );
 			if ( 0 === $pluswebp_settings['quality'] || 100 < $pluswebp_settings['quality'] ) {
 				WP_CLI::error( __( 'optional argument quality(int) : Invalid value.', 'plus-webp' ) );
-			}
-		}
-		if ( array_key_exists( 'replace', $assoc_args ) ) {
-			$replace = strtolower( sanitize_text_field( $assoc_args['replace'] ) );
-			if ( 'true' === $replace ) {
-				$pluswebp_settings['replace'] = true;
-			} else if ( 'false' === $replace ) {
-				$pluswebp_settings['replace'] = false;
-			} else {
-				WP_CLI::error( __( 'optional argument replace(bool) : Invalid value.', 'plus-webp' ) );
-			}
-		}
-		if ( array_key_exists( 'addext', $assoc_args ) ) {
-			$addext = strtolower( sanitize_text_field( wp_unslash( $assoc_args['addext'] ) ) );
-			if ( 'true' === $addext ) {
-				$pluswebp_settings['addext'] = true;
-			} else if ( 'false' === $addext ) {
-				$pluswebp_settings['addext'] = false;
-			} else {
-				WP_CLI::error( __( 'optional argument addext(bool) : Invalid value.', 'plus-webp' ) );
 			}
 		}
 		if ( array_key_exists( 'types', $assoc_args ) ) {
@@ -124,44 +107,95 @@ class PlusWebpAVIFCLI {
 	/**
 	 * Plus WebP or AVIF command
 	 *
+	 * ## OPTIONS
+	 *
+	 * <string>
+	 * : webp -> Generated WebP, avif -> Generated AVIF, help -> Specification of this command.
+	 *
+	 * [<string>]
+	 * : Optional argument - mail -> Send results via email.
+	 *
+	 * [<string>]
+	 * : Optional argument - replace -> WebP or AVIF replacement of images and contents.
+	 *
+	 * [<string>]
+	 * : Optional argument - addext -> Append the webp or avif extension to the original filename.
+	 *
+	 * [--pid=<int>]
+	 * : Optional argument - --pid=12152 -> Process only specified Media ID(Conversion source ID).
+	 *
+	 * [--quality=<int>]
+	 * : Optional argument - --quality=90 -> Specifies the quality of WebP or AVIF.
+	 *
+	 * [--types=<string>]
+	 * : Optional argument - --types=image/png,image/gif -> MIME type to convert.
+	 *
+	 * ## EXAMPLES
+	 *
+	 * wp pluswebpavif webp --pid=12152
+	 * // Create WebP. Post ID 12152 only.
+	 *
+	 * wp pluswebpavif avif mail --quality=90 --types=image/png,image/gif
+	 * // Create AVIF. Result email sent. Quality 90%. Convert image/png,image/gif.
+	 *
+	 * wp pluswebpavif webp replace addext
+	 * // Create WebP. WebP or AVIF replacement of images and contents. Append the webp or avif extension to the original filename.
+	 *
+	 * @when after_wp_load
 	 * @param array $args  arguments.
 	 * @param array $assoc_args  optional arguments.
 	 * @since 1.00
 	 */
 	public function pluswebpavif_cli_command( $args, $assoc_args ) {
 
-		$input_error_message = __( 'Please enter the arguments.', 'plus-webp' ) . "\n";
-		$input_error_message .= __( '1st argument(string) : webp -> Generated WebP, avif -> Generated AVIF', 'plus-webp' ) . "\n";
-		$input_error_message .= __( 'optional argument mail(bool) : --mail=true -> Send results via email', 'plus-webp' ) . "\n";
-		$input_error_message .= __( 'optional argument pid(int) : --pid=12152 : Media ID(Conversion source ID) -> Process only specified Media ID.', 'plus-webp' ) . "\n";
-		$input_error_message .= __( 'optional argument quality(int) : --quality=90 : Specifies the quality of WebP or AVIF.', 'plus-webp' ) . "\n";
-		$input_error_message .= __( 'optional argument replace(bool) : --replace=false : WebP or AVIF replacement of images and contents.', 'plus-webp' ) . "\n";
-		$input_error_message .= __( 'optional argument addext(bool) : --addext=true : Append the webp or avif extension to the original filename.', 'plus-webp' ) . "\n";
-		$input_error_message .= __( 'optional argument types(string) : --types=image/png,image/gif : MIME type to convert.', 'plus-webp' ) . "\n";
-		if ( is_array( $args ) && ! empty( $args ) &&
-				( 'webp' === $args[0] || 'avif' === $args[0] ) ) {
+		$output = null;
+		$mail = false;
+		$replace = false;
+		$addext = false;
+		if ( ! empty( $args ) ) {
+			foreach ( $args as $key => $value ) {
+				switch ( $value ) {
+					case 'webp':
+						$output = 'webp';
+						break;
+					case 'avif':
+						$output = 'avif';
+						break;
+					case 'help':
+						$output = 'help';
+						break;
+					case 'mail':
+						$mail = true;
+						break;
+					case 'replace':
+						$replace = true;
+						break;
+					case 'addext':
+						$addext = true;
+						break;
+				}
+			}
+		}
 
-			$output = $args[0];
+		$input_error_message = __( 'Please enter the arguments.', 'plus-webp' ) . "\n";
+		$input_error_message .= __( '1st argument(string) : webp -> Generated WebP, avif -> Generated AVIF, help -> Specification of this command.', 'plus-webp' ) . "\n";
+		$input_error_message .= __( 'optional argument(string) : mail -> Send results via email.', 'plus-webp' ) . "\n";
+		$input_error_message .= __( 'optional argument(string) : replace -> WebP or AVIF replacement of images and contents.', 'plus-webp' ) . "\n";
+		$input_error_message .= __( 'optional argument(string) : addext -> Append the webp or avif extension to the original filename.', 'plus-webp' ) . "\n";
+		$input_error_message .= __( 'optional argument pid(int) : --pid=12152 -> Process only specified Media ID(Conversion source ID).', 'plus-webp' ) . "\n";
+		$input_error_message .= __( 'optional argument quality(int) : --quality=90 -> Specifies the quality of WebP or AVIF.', 'plus-webp' ) . "\n";
+		$input_error_message .= __( 'optional argument types(string) : --types=image/png,image/gif -> MIME type to convert.', 'plus-webp' ) . "\n";
+
+		if ( 'webp' === $output || 'avif' === $output ) {
 
 			$pid = 0;
 			if ( array_key_exists( 'pid', $assoc_args ) ) {
 				$pid = intval( $assoc_args['pid'] );
 			}
-			$mail = false;
-			if ( array_key_exists( 'mail', $assoc_args ) ) {
-				$mail = strtolower( sanitize_text_field( wp_unslash( $assoc_args['mail'] ) ) );
-				if ( 'true' === $mail ) {
-					$mail = true;
-				} else if ( 'false' === $addext ) {
-					$mail = false;
-				} else {
-					WP_CLI::error( __( 'optional argument mail(bool) : Invalid value.', 'plus-webp' ) );
-				}
-			}
 
 			$pluswebp_settings_default = get_option( 'pluswebp' );
 			update_option( 'pluswebp_default', $pluswebp_settings_default );
-			$pluswebp_settings = $this->settings_change( $output, $assoc_args, $pluswebp_settings_default );
+			$pluswebp_settings = $this->settings_change( $output, $replace, $addext, $assoc_args, $pluswebp_settings_default );
 			update_option( 'pluswebp', $pluswebp_settings );
 
 			if ( 0 < $pid ) {
@@ -181,7 +215,7 @@ class PlusWebpAVIFCLI {
 					}
 				} else {
 					$message = 'ID: ' . $pid . "\n";
-					$message .= __( 'This media ID has already been converted or is neither an image nor a madia.', 'plus-webp' ) . "\n";
+					$message .= __( 'This media ID has already been converted or is neither an image nor media.', 'plus-webp' ) . "\n";
 					$message .= "\n";
 					WP_CLI::warning( $message );
 				}

@@ -134,7 +134,7 @@ const Generate = () => {
 			<b><li>{ __( 'WP-CLI commands are available. If you have a large number of files, WP-CLI commands is more reliable. Command line option allows the user to specify whether to send e-mail, the media ID of the sender and the settings.', 'plus-webp' ) }</li></b>
 			<div className="settings">
 				<strong>WP-CLI</strong>
-				<code>wp pluswebpavif</code>
+				<code>wp pluswebpavif help</code> <code>wp pluswebpavif --help</code>
 			</div>
 			{ items_description }
 			{ items_generate_button } &nbsp;&nbsp;&nbsp;
