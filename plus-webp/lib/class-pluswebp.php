@@ -118,15 +118,14 @@ class PlusWebp {
 				$file_thumb      = $value['file'];
 				$file_thumb_webp = $this->change_ext( $file_thumb, $ext, $pluswebp_settings['addext'] );
 				$ret  = $this->create_webp( $path . $file_thumb, $mime_type, $path . $file_thumb_webp, $pluswebp_settings['quality'], $pluswebp_settings['output_mime'] );
-				if ( $ret ) {
-					$metadata_webp['sizes'][ $key ]['file']      = $file_thumb_webp;
-					$metadata_webp['sizes'][ $key ]['mime-type'] = $pluswebp_settings['output_mime'];
-					$webp_size = filesize( $path . wp_basename( $file_thumb_webp ) );
-					$metadata_webp['sizes'][ $key ]['filesize'] = $webp_size;
-					if ( $pluswebp_settings['replace'] ) {
-						wp_delete_file( $path . $file_thumb );
-						$this->change_db( $url . $file_thumb, $url . $file_thumb_webp );
-					}
+				/* $ret -> ignore : Some metadata also has duplicate filenames */
+				$metadata_webp['sizes'][ $key ]['file']      = $file_thumb_webp;
+				$metadata_webp['sizes'][ $key ]['mime-type'] = $pluswebp_settings['output_mime'];
+				$webp_size = filesize( $path . wp_basename( $file_thumb_webp ) );
+				$metadata_webp['sizes'][ $key ]['filesize'] = $webp_size;
+				if ( $pluswebp_settings['replace'] ) {
+					wp_delete_file( $path . $file_thumb );
+					$this->change_db( $url . $file_thumb, $url . $file_thumb_webp );
 				}
 			}
 
