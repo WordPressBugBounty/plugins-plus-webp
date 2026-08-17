@@ -291,42 +291,88 @@ class PlusWebp {
 			return array( array(), array() );
 		}
 
-		$args = array(
-			'post_type'      => 'attachment',
-			'post_status'    => 'inherit',
-			'post_mime_type' => $types,
-			'posts_per_page' => -1,
-			'orderby'        => 'date',
-			'order'          => 'DESC',
-		);
-		$posts = get_posts( $args );
-
 		global $wpdb;
-		$webp_titles = $wpdb->get_col(
-			$wpdb->prepare(
-				"
-				SELECT	post_title
-				FROM	{$wpdb->prefix}posts
-				WHERE	post_type = 'attachment'
-						AND post_mime_type IN ( %s )
-						AND post_status = 'inherit'
-				",
-				$output_mime,
-			)
-		);
 
-		$post_ids = array();
-		$no_file_ids = array();
-		$count = 0;
-		foreach ( $posts as $post ) {
-			if ( ! in_array( $post->post_title, $webp_titles ) ) {
-				if ( file_exists( get_attached_file( $post->ID ) ) ) {
-					$post_ids[] = $post->ID;
-				} else {
-					$no_file_ids[] = $post->ID;
-				}
+		/* Retrieve a list of converted titles that match $output_mime */
+		$webp_titles = array();
+		if ( ! empty( $output_mime ) ) {
+			$webp_titles_raw = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT post_title
+						FROM {$wpdb->posts}
+						WHERE post_type = 'attachment'
+							AND post_status = 'inherit'
+							AND post_mime_type = %s",
+					$output_mime
+				)
+			);
+
+			if ( ! empty( $webp_titles_raw ) ) {
+				/* Reverse the key and value to speed up searches (O(1) access) */
+				$webp_titles = array_flip( $webp_titles_raw );
 			}
 		}
+
+		/* Creating SQL placeholders for $types */
+		$types_placeholders = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+
+		$post_ids    = array();
+		$no_file_ids = array();
+
+		$chunk_size = 2000; /* Retrieve in batches of 2,000 */
+		$offset     = 0;
+
+		do {
+			/* SQL Parameter Construction (array elements of $types + $chunk_size + $offset) */
+			$params = array_merge( $types, array( $chunk_size, $offset ) );
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			$chunk_posts = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT ID, post_title
+						FROM {$wpdb->posts}
+						WHERE post_type = 'attachment'
+							AND post_status = 'inherit'
+							AND post_mime_type IN ($types_placeholders)
+						ORDER BY post_date DESC
+						LIMIT %d OFFSET %d",
+					$params
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+
+			if ( is_array( $chunk_posts ) ) {
+				$fetched_count = count( $chunk_posts );
+			} else {
+				break;
+			}
+			if ( 0 === $fetched_count ) {
+				break;
+			}
+
+			foreach ( $chunk_posts as $post ) {
+				if ( ! isset( $webp_titles[ $post->post_title ] ) ) {
+					$file_path = get_attached_file( $post->ID );
+
+					if ( $file_path && file_exists( $file_path ) ) {
+						$post_ids[] = (int) $post->ID;
+					} else {
+						$no_file_ids[] = (int) $post->ID;
+					}
+
+					/* Delete the meta-cache generated when retrieving the attachment path on a per-file basis */
+					clean_post_cache( $post->ID );
+				}
+			}
+
+			$offset += $chunk_size;
+
+			/* Reset the object cache to keep memory usage consistent */
+			wp_cache_flush();
+
+		} while ( $fetched_count === $chunk_size );
+
+		unset( $webp_titles, $chunk_posts );
 
 		return array( $post_ids, $no_file_ids );
 	}
@@ -453,7 +499,7 @@ class PlusWebp {
 		}
 
 		imagecopy( $img, $src, 0, 0, 0, 0, imagesx( $src ), imagesy( $src ) );
-		imagedestroy( $src );
+		unset( $src );
 
 		switch ( $output_mime ) {
 			case 'image/webp':
@@ -466,7 +512,7 @@ class PlusWebp {
 				$ret = imagewebp( $img, $filename_webp, $quality );
 		}
 
-		imagedestroy( $img );
+		unset( $img );
 
 		return $ret;
 	}
@@ -518,7 +564,12 @@ class PlusWebp {
 		);
 
 		/* Advanced change database */
-		list( $before_url, $after_url ) = apply_filters( 'plus_webp_advanced_change_db', $before_url, $after_url );
+		$result = apply_filters( 'plus_webp_advanced_change_db', $before_url, $after_url );
+		if ( is_array( $result ) && count( $result ) >= 2 ) {
+			list( $before_url, $after_url ) = $result;
+		} else if ( is_string( $result ) ) {
+			$before_url = $result;
+		}
 	}
 
 	/** ==================================================
