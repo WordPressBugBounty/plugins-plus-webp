@@ -1,6 +1,7 @@
 import Credit from './credit';
 import Generate from './generate';
 import Settings from './settings';
+import './plus-webp.css';
 
 const PlusWebp = () => {
 

@@ -86,6 +86,10 @@ class PlusWebp {
 	 */
 	public function generate_webp( $metadata, $attachment_id ) {
 
+		if ( ! is_array( $metadata ) ) {
+			return $metadata;
+		}
+
 		$pluswebp_settings = get_option( 'pluswebp' );
 
 		switch ( $pluswebp_settings['output_mime'] ) {

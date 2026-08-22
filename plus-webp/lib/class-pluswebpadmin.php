@@ -142,30 +142,11 @@ class PlusWebpAdmin {
 
 		$pluswebp_settings = get_option( 'pluswebp' );
 
-		list( $post_ids, $no_file_ids ) = apply_filters( 'pluswebp_get_allimages', $pluswebp_settings['types'], $pluswebp_settings['output_mime'] );
-
-		$non_generate_description = null;
-		if ( ! empty( $no_file_ids ) ) {
-			/* translators: Count of no file Media */
-			$non_generate_description = sprintf( __( 'Found %1$d media(id: %2$s), exists in the database, but the file does not, so the conversion is not performed.', 'plus-webp' ), count( $no_file_ids ), implode( ',', $no_file_ids ) );
-		}
-
-		wp_localize_script(
-			'plus-webp',
-			'pluswebpgenerate_data',
-			array(
-				/* translators: Count of Media */
-				'generate_description' => sprintf( __( 'Found %1$d media that can be generated.', 'plus-webp' ), count( $post_ids ) ),
-				'non_generate_description' => $non_generate_description,
-				'post_ids' => wp_json_encode( $post_ids, JSON_UNESCAPED_SLASHES ),
-			)
-		);
-
 		wp_localize_script(
 			'plus-webp',
 			'pluswebpsettings_data',
 			array(
-				'settings' => wp_json_encode( $pluswebp_settings, JSON_UNESCAPED_SLASHES ),
+				'settings' => $pluswebp_settings,
 			)
 		);
 
@@ -180,6 +161,16 @@ class PlusWebpAdmin {
 	 * @since 4.00
 	 */
 	public function register_rest() {
+
+		register_rest_route(
+			'rf/plus-webp-confirm_api',
+			'/token',
+			array(
+				'methods' => 'POST',
+				'callback' => array( $this, 'confirm_api_save' ),
+				'permission_callback' => array( $this, 'rest_permission' ),
+			),
+		);
 
 		register_rest_route(
 			'rf/plus-webp-generate_api',
@@ -213,6 +204,39 @@ class PlusWebpAdmin {
 	}
 
 	/** ==================================================
+	 * Rest API save for Confirm
+	 *
+	 * @param object $request  changed data.
+	 * @since 5.20
+	 */
+	public function confirm_api_save( $request ) {
+
+		$args = $request->get_json_params();
+
+		$args['post_ids'] = array();
+		$args['ids_desc'] = null;
+		$args['non_ids_desc'] = null;
+		if ( $args['submit'] ) {
+			$pluswebp_settings = get_option( 'pluswebp' );
+			list( $post_ids, $no_file_ids ) = apply_filters( 'pluswebp_get_allimages', $pluswebp_settings['types'], $pluswebp_settings['output_mime'] );
+			update_option( 'test', $post_ids );
+			$args['post_ids'] = $post_ids;
+			if ( ! empty( $post_ids ) ) {
+				/* translators: Count of file Media */
+				$args['ids_desc'] = sprintf( __( 'Found %1$d media that can be generated.', 'plus-webp' ), count( $post_ids ) );
+			} else {
+				$args['ids_desc'] = __( 'Cannot find any media that can be generated.', 'plus-webp' );
+			}
+			if ( ! empty( $no_file_ids ) ) {
+				/* translators: Count of no file Media */
+				$args['non_ids_desc'] = sprintf( __( 'Found %1$d media(id: %2$s), exists in the database, but the file does not, so the conversion is not performed.', 'plus-webp' ), count( $no_file_ids ), implode( ',', $no_file_ids ) );
+			}
+		}
+
+		return new WP_REST_Response( $args, 200 );
+	}
+
+	/** ==================================================
 	 * Rest API save for Generate
 	 *
 	 * @param object $request  changed data.
@@ -220,14 +244,16 @@ class PlusWebpAdmin {
 	 */
 	public function generate_api_save( $request ) {
 
-		$args = json_decode( $request->get_body(), true );
+		$args = $request->get_json_params();
 
 		$count = absint( $args['count'] );
 		$max_count = absint( $args['max_count'] );
 		$attach_id = absint( $args['post_id'] );
 		$messages = get_option( 'pluswebp_messages', array() );
+		$sent_mail = boolval( $args['sent_mail'] );
+		$stop = boolval( $args['stop'] );
 
-		if ( $args['generate'] ) {
+		if ( boolval( $args['generate'] ) ) {
 			$metadata_org = wp_get_attachment_metadata( $attach_id );
 
 			delete_option( 'pluswebp_generate' );
@@ -240,11 +266,15 @@ class PlusWebpAdmin {
 				update_option( 'pluswebp_messages', $messages );
 			}
 			if ( $count === $max_count ) {
-				do_action( 'pluswebp_mail_generate_message', $messages, $max_count );
+				if ( $sent_mail && ! empty( get_option( 'pluswebp_messages' ) ) ) {
+					do_action( 'pluswebp_mail_generate_message', get_option( 'pluswebp_messages' ), count( get_option( 'pluswebp_messages' ) ) );
+				}
 				delete_option( 'pluswebp_messages' );
 			}
-		} else {
-			do_action( 'pluswebp_mail_generate_message', $messages, count( $messages ) );
+		} else if ( ! boolval( $args['generate'] ) && $stop ) {
+			if ( $sent_mail && ! empty( get_option( 'pluswebp_messages' ) ) ) {
+				do_action( 'pluswebp_mail_generate_message', get_option( 'pluswebp_messages' ), count( get_option( 'pluswebp_messages' ) ) );
+			}
 			delete_option( 'pluswebp_messages' );
 		}
 
@@ -259,13 +289,23 @@ class PlusWebpAdmin {
 	 */
 	public function settings_api_save( $request ) {
 
-		$args = json_decode( $request->get_body(), true );
+		$args = $request->get_json_params();
+
+		if ( isset( $args['settings'] ) && is_array( $args['settings'] ) ) {
+			$settings = $args['settings'];
+		} else {
+			return new WP_Error(
+				'invalid_settings',
+				'Invalid settings.',
+				array( 'status' => 400 )
+			);
+		}
 
 		$options = array();
-		$options['output_mime'] = sanitize_text_field( wp_unslash( $args['output_mime'] ) );
-		$options['quality'] = intval( $args['quality'] );
+		$options['output_mime'] = sanitize_text_field( wp_unslash( $settings['output_mime'] ) );
+		$options['quality'] = intval( $settings['quality'] );
 		$options['types'] = filter_var(
-			wp_unslash( $args['types'] ),
+			wp_unslash( $settings['types'] ),
 			FILTER_CALLBACK,
 			array(
 				'options' => function ( $value ) {
@@ -273,8 +313,8 @@ class PlusWebpAdmin {
 				},
 			)
 		);
-		$options['addext'] = boolval( $args['addext'] );
-		$options['replace'] = boolval( $args['replace'] );
+		$options['addext'] = boolval( $settings['addext'] );
+		$options['replace'] = boolval( $settings['replace'] );
 
 		update_option( 'pluswebp', $options );
 

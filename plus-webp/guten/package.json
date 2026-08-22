@@ -1,6 +1,6 @@
 {
   "name": "plus-webp",
-  "version": "2.0.5",
+  "version": "3.0.0",
   "description": "Plus WebP",
   "main": "index.js",
   "scripts": {
@@ -9,12 +9,12 @@
   },
   "author": "Katsushi Kawamori",
   "devDependencies": {
-    "@wordpress/scripts": "30.18.0"
+    "@wordpress/scripts": "34.1.0"
   },
   "dependencies": {
-    "@wordpress/api-fetch": "^7.25.0",
-    "@wordpress/dom-ready": "^4.25.0",
-    "@wordpress/element": "^6.25.0",
-    "@wordpress/i18n": "^5.25.0"
+    "@wordpress/api-fetch": "^7.53.0",
+    "@wordpress/dom-ready": "^4.53.0",
+    "@wordpress/element": "^8.5.0",
+    "@wordpress/i18n": "^6.26.0"
   }
 }

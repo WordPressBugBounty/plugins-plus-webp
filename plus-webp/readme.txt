@@ -5,7 +5,7 @@ Tags: media, upload, webp, avif
 Requires at least: 6.6
 Requires PHP: 8.1
 Tested up to: 7.1
-Stable tag: 5.12
+Stable tag: 5.20
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,9 @@ none
 3. Settings
 
 == Changelog ==
+
+= [5.20] 2026/08/22 =
+* Fix - Rebuilt the admin dashboard.
 
 = [5.12] 2026/08/17 =
 * Fix - Issue where the app crashes when there are a large number of images.
